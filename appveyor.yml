@@ -20,10 +20,9 @@ install:
     if not exist C:\deps 7z x -y C:\deps.zip -oC:\deps > NUL:
 build_script:
     - c:\deps\nixenv.bat
-    - ctest -VV --output-on-failure -S .appveyor.ctest
     - cmake --build .\build --config %CONFIGURATION% --target PACKAGE
 test_script:
-- cmd:
+    - ctest -VV --output-on-failure -S .appveyor.ctest
 artifacts:
-- path: build\*.exe
+    - path: build\*.exe
 
