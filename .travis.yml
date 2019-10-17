@@ -40,6 +40,7 @@ cache:
 
 before_install:
   - docker build -f ./dockerfiles/albuild.Dockerfile . -t local/nixio
+  - docker run -it -d --name nixbuilder local/nixio
   - if [[ "$CXX" == "g++" ]];
     then
        export CTEST_ARGS=-V;
@@ -47,12 +48,15 @@ before_install:
        export CTEST_ARGS=-VV;
     fi
   - if [ "$CXX" == "g++" ]; then
-    docker run -it local/nixio g++ --version;
-    else docker run -it local/nixio clang --version;
+      docker exec nixbuilder g++ --version;
+    else
+      docker exec nixbuilder clang --version;
     fi
 
 script:
-  - docker run -it -e FS_BACKEND -e CXX -e CXX_FOR_BUILD -e CC -e CC_FOR_BUILD local/nixio ctest ${CTEST_ARGS} --output-on-failure -S .travis.ctest
+  - docker exec nixbuilder cmake ..
+  - docker exec nixbuilder make
+  - docker exec nixbuilder make test
 
 after_success:
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$FS_BACKEND" == "OFF" ]]; then
